@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('apellido');
             $table->string('celular')->nullable();
+            $table->string('estado');
             $table->foreignId('id_tipo_usuario')->constrained('tipo_usuarios');
             $table->timestamps();
         });
