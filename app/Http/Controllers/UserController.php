@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 class UserController extends Controller
 {
     /**
@@ -11,15 +15,16 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $users = User::all();
+       return response()->json($users);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+       
     }
 
     /**
@@ -27,7 +32,30 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'email'=>'required|email',
+            'password'=>'required',
+            'nombre'=>'required',
+            'apellido'=>'required',
+            ]);
+            if ($validator->fails()) {
+                $data=[
+                    "message"=>"Error en validacion de datos",
+                    "error"=> $validator->errors(),
+                    "status"=>400
+                ];
+                return response()->json($data);
+            }
+            $type=2;
+             User::create([
+                'nombre' => $request->nombre,
+                'apellido' => $request->apellido,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'estado' => 1,
+                'id_tipo_usuario' => $type,
+            ]);
+            return response()->json("usuario creado con exito", 200);
     }
 
     /**
@@ -61,4 +89,34 @@ class UserController extends Controller
     {
         //
     }
+
+    public function login(Request $request)
+    {
+        
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json(['message' => 'Credenciales inválidas'], 401);
+        }
+        
+        $user = User::where('email', $request->email)->first();
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json(
+                [
+                    'accesToken'=>$token,
+                    'tokenType'=>'Bearer',
+                    'typeUserId'=>$user->id_tipo_usuario,
+                    'id'=>$user->id,
+                    'userName'=>$user->name,
+                    'email'=>$user->email,
+                    'rol'=>$user->tipo_usuario,
+                    'message' => "Inicio de Sesion exitoso"
+                ],
+                200
+    
+            );
+        
+        
+    }
+
 }

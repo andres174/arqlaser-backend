@@ -20,8 +20,7 @@ return new class extends Migration
 
             $table->string('nombre');
             $table->string('apellido');
-            $table->string('celular');
-            $table->string('direccion');
+            $table->string('celular')->nullable();
             $table->foreignId('id_tipo_usuario')->constrained('tipo_usuarios');
             $table->timestamps();
         });

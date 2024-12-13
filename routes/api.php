@@ -40,5 +40,7 @@ Route::prefix('arq')->group(function () {
    Route::resource('cotizaciones', CotizacionesController::class);
    Route::resource('config', ConfigController::class);
 
+   Route::post('login', [UserController::class ,'login']);
+
 
 });
