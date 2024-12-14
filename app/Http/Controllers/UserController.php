@@ -34,7 +34,7 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(),[
             'email'=>'required|email',
-            'password'=>'required',
+            'password'=>'required|',
             'nombre'=>'required',
             'apellido'=>'required',
             ]);
@@ -47,7 +47,7 @@ class UserController extends Controller
                 return response()->json($data);
             }
             $type=2;
-             User::create([
+            $user= User::create([
                 'nombre' => $request->nombre,
                 'apellido' => $request->apellido,
                 'email' => $request->email,
@@ -55,7 +55,21 @@ class UserController extends Controller
                 'estado' => 1,
                 'id_tipo_usuario' => $type,
             ]);
-            return response()->json("usuario creado con exito", 200);
+            $token = $user->createToken('auth_token')->plainTextToken;
+            return response()->json(
+                [
+                    'accesToken'=>$token,
+                    'tokenType'=>'Bearer',
+                    'typeUserId'=>$user->id_tipo_usuario,
+                    'id'=>$user->id,
+                    'userName'=>$user->nombre,
+                    'email'=>$user->email,
+                    'celular'=>$user->celular,
+                    'message' => "Usuario registrado con exito"
+                ],
+                200
+    
+            );
     }
 
     /**
@@ -107,9 +121,9 @@ class UserController extends Controller
                     'tokenType'=>'Bearer',
                     'typeUserId'=>$user->id_tipo_usuario,
                     'id'=>$user->id,
-                    'userName'=>$user->name,
+                    'userName'=>$user->nombre,
                     'email'=>$user->email,
-                    'rol'=>$user->tipo_usuario,
+                    'celular'=>$user->celular,
                     'message' => "Inicio de Sesion exitoso"
                 ],
                 200
