@@ -15,7 +15,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
+        $users = User::all()->where('estado',1);
        return response()->json($users);
     }
 
@@ -77,7 +77,11 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $user = User::find($id);
+        if ( Empty($user) ){
+            return response()->json(["message"=> "Usuario no encontrado"],404);
+        }
+        return response()->json($user,200);
     }
 
     /**
@@ -93,7 +97,34 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+      
+        $validator = Validator::make($request->all(),[
+            'email'=>'required|email',
+            'nombre'=>'required',
+            'apellido'=>'required',
+            'celular'=>'required'
+            ]);
+            if ($validator->fails()) {
+                $data=[
+                    "message"=>"Error en validacion de datos",
+                    "error"=> $validator->errors(),
+                    "status"=>400
+                ];
+                return response()->json($data);
+            }
+            $user= User::find($id);
+            $user->nombre = $request->nombre;
+            $user->apellido = $request->apellido;
+            $user->email = $request->email;
+            $user->celular = $request->celular;
+            $user->save();
+            return response()->json(
+                [
+                    'message' => "Actualizacion con exitosa"
+                ],
+                200
+    
+            );
     }
 
     /**
@@ -101,7 +132,13 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = User::find($id);
+        if ( Empty($user) ){
+            return response()->json(["message"=> "Usuario no encontrado"],404);
+        }
+        $user->estado=0;
+        $user->save();
+           return response()->json(["message"=>"Usuario eliminado con exito"],200);
     }
 
     public function login(Request $request)
